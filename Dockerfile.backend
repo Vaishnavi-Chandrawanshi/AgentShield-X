@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+WORKDIR /workspace
+
+# Install system dependencies needed for compiling python libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ /workspace/backend/
+COPY agentshield.db /workspace/agentshield.db
+COPY alembic.ini /workspace/alembic.ini
+COPY migrations/ /workspace/migrations/
+
+EXPOSE 8000
+
+ENV PYTHONPATH=/workspace
+
+CMD ["sh", "-c", "python backend/wait_for_db.py && alembic upgrade head && uvicorn backend.app.main:app --host 0.0.0.0 --port 8000"]

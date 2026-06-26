@@ -1,0 +1,77 @@
+{
+  "mcp_servers": {
+    "local_filesystem": {
+      "name": "Local Filesystem Utilities",
+      "endpoint": "http://localhost:8001",
+      "enabled": true,
+      "allowed_categories": [
+        "file_read",
+        "file_search"
+      ],
+      "allowed_tools": [
+        "list_dir",
+        "view_file",
+        "grep_search"
+      ],
+      "blocked_tools": [
+        "write_to_file",
+        "delete_file"
+      ]
+    },
+    "web_searcher": {
+      "name": "Web Crawler and Search Engine",
+      "endpoint": "http://localhost:8002",
+      "enabled": true,
+      "allowed_categories": [
+        "search",
+        "fetch"
+      ],
+      "allowed_tools": [
+        "search_web",
+        "read_url_content"
+      ],
+      "blocked_tools": []
+    }
+  },
+  "network_policies": {
+    "allowed_domains": [
+      "api.github.com",
+      "huggingface.co",
+      "pypi.org",
+      "arxiv.org",
+      "clinicaltrials.gov"
+    ],
+    "block_unknown_domains": true
+  },
+  "api_policies": {
+    "allowed_scopes": [
+      "read:user",
+      "read:repo",
+      "public_repo"
+    ],
+    "enforced_scopes": [
+      "auth_token_required"
+    ]
+  },
+  "execution_policies": {
+    "block_destructive_operations": true,
+    "block_sensitive_exports": true,
+    "destructive_operation_keywords": [
+      "rm",
+      "rf",
+      "drop",
+      "delete",
+      "truncate",
+      "format",
+      "purge",
+      "destroy"
+    ],
+    "sensitive_data_categories": [
+      "SSN",
+      "API_KEYS",
+      "CREDIT_CARDS",
+      "PRIVATE_KEYS",
+      "PASSWORD_HASHES"
+    ]
+  }
+}
