@@ -92,13 +92,28 @@ ipython_config.py
 .pdm-plugins/
 __pdm-build/
 
-# venv
+# venv and environment variables
 venv/
 ENV/
 env/
 .env
+.env.*
+!.env.example
 .venv
 pip-selfcheck.json
+
+# Secrets, credentials and API keys
+*credential*
+*creds*
+credentials.json
+client_secret*.json
+secrets.json
+api_key*
+*secret*
+*.pem
+*.key
+*.cert
+*.pfx
 
 # IDEs
 .idea/
