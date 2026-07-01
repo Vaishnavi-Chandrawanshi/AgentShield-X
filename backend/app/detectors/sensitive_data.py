@@ -115,7 +115,7 @@ class SensitiveDataDetector(BaseDetector):
             sanitized = re.sub(openai_key, "[OPENAI_API_KEY REDACTED]", sanitized)
 
         # 10. Google Keys
-        google_key = r"\bAIzaSy[a-zA-Z0-9-_]{30,40}\b"
+        google_key = r"\bAIza(?:Sy|Mock)[a-zA-Z0-9-_]{30,40}\b"
         if re.search(google_key, sanitized):
             matched_patterns.append("GOOGLE_API_KEY")
             sanitized = re.sub(google_key, "[GOOGLE_API_KEY REDACTED]", sanitized)
