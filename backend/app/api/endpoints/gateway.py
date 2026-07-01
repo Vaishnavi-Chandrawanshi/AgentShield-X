@@ -20,21 +20,28 @@ def evaluate_prompt(
     db: Session = Depends(get_db)
 ):
     """
-    Evaluates a user prompt using the AgentShield-X
+    Evaluates a user prompt or uploaded document using the AgentShield-X
     multi-agent orchestration pipeline.
     """
+    prompt_str = request.prompt or ""
+    file_bytes_b64 = request.file_bytes_base64
+
+    # Reject ONLY when both prompt and document are empty.
+    if not prompt_str.strip() and not file_bytes_b64:
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse("Please enter a prompt or upload a supported document.", status_code=422)
 
     file_bytes = None
-    if request.file_bytes_base64:
+    if file_bytes_b64:
         try:
-            file_bytes = base64.b64decode(request.file_bytes_base64)
+            file_bytes = base64.b64decode(file_bytes_b64)
         except Exception:
             pass
 
     orchestrator = OrchestratorAgent()
 
     result = orchestrator.run_pipeline(
-        prompt=request.prompt,
+        prompt=prompt_str,
         session_id=request.session_id,
         db=db,
         file_bytes=file_bytes,
@@ -48,5 +55,6 @@ def evaluate_prompt(
         overall_risk_score=result["overall_risk_score"],
         policy_action=result["policy_action"],
         message=result["message"],
-        events_triggered=result["events_triggered"]
+        events_triggered=result["events_triggered"],
+        all_detector_details=result.get("all_detector_details", [])
     )

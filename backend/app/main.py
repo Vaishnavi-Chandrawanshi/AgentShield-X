@@ -8,11 +8,19 @@ from backend.app.core.security import create_access_token
 from backend.app.schemas.response import Token
 from backend.app.api.endpoints import gateway, approval, audit, auth
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import PlainTextResponse
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="1.0.0",
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return PlainTextResponse("Please enter a prompt or upload a supported document.", status_code=422)
+
 
 # CORS configuration
 app.add_middleware(

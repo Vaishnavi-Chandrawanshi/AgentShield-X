@@ -3,7 +3,7 @@ from typing import Optional, List
 
 class GatewayPromptRequest(BaseModel):
     session_id: str = Field(..., min_length=1, max_length=255, description="The unique session identifier for the browser or client")
-    prompt: str = Field(..., min_length=1, description="The raw prompt query input to be sanitized and verified")
+    prompt: Optional[str] = Field(None, description="The raw prompt query input to be sanitized and verified")
     file_bytes_base64: Optional[str] = Field(None, description="Optional Base64 encoded file attachment bytes")
     file_name: Optional[str] = Field(None, description="Optional filename of the file attachment")
 

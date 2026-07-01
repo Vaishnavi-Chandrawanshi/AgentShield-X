@@ -1,19 +1,25 @@
 import streamlit as st
 import pandas as pd
 import datetime
+import textwrap
 
 try:
     from frontend.utils import fetch_audit_logs
 except ModuleNotFoundError:
     from utils import fetch_audit_logs
 
+def render_html(html_str):
+    """Clean HTML string from leading/trailing whitespaces per line and render it safely."""
+    cleaned = "\n".join(line.strip() for line in html_str.split("\n") if line.strip())
+    st.markdown(cleaned, unsafe_allow_html=True)
+
 def render_security_report():
-    st.markdown("""
+    render_html("""
         <div style="padding: 10px 0px; margin-bottom: 20px; border-bottom: 1px solid #1e293b;">
             <h2 style="color: #f8fafc; margin-bottom: 4px; font-weight: 700;">📋 Compliance & Audit Registry</h2>
             <p style="color: #64748b; font-size: 14px; margin: 0;">Access historical gateway transaction logs, decrypted security findings, and policy compliance docs.</p>
         </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # Compile registry check
     if "token" not in st.session_state or not st.session_state.token:
@@ -21,7 +27,7 @@ def render_security_report():
         return
 
     # Filter Controls Panel
-    st.markdown("<p style='font-size: 14px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px;'>SIEM Registry Search Filters</p>", unsafe_allow_html=True)
+    render_html("<p style='font-size: 14px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px;'>SIEM Registry Search Filters</p>")
     col1, col2, col3 = st.columns([2.5, 2.5, 1])
 
     with col1:
@@ -32,7 +38,7 @@ def render_security_report():
             ["ALL", "ALLOW", "BLOCK", "REDACTED", "HUMAN_REVIEW"]
         )
     with col3:
-        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        render_html("<div style='height: 28px;'></div>")
         st.button("🔍 Filter", use_container_width=True)
 
     # Fetch logs from API
@@ -47,11 +53,23 @@ def render_security_report():
         )
 
     if not logs:
-        st.markdown("""
-            <div style="background-color: #131a26; border: 1px solid #1e293b; padding: 25px; border-radius: 4px; text-align: center;">
-                <p style="color: #64748b; margin: 0; font-size: 13px;">No security logs matched the current search criteria.</p>
+        empty_search_svg = """
+        <svg viewBox="0 0 200 120" width="120" height="70" style="display: block; margin: 0 auto 12px auto;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="40" y="20" width="120" height="6" rx="2" fill="#1e293b" opacity="0.5"/>
+          <rect x="40" y="40" width="90" height="6" rx="2" fill="#1e293b" opacity="0.3"/>
+          <rect x="40" y="60" width="110" height="6" rx="2" fill="#1e293b" opacity="0.4"/>
+          <circle cx="140" cy="70" r="22" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3 3"/>
+          <circle cx="140" cy="70" r="15" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+          <line x1="152" y1="82" x2="166" y2="96" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>
+        """
+        render_html(f"""
+            <div style="background-color: #0b0f19; border: 1px dashed #141b2d; padding: 35px; border-radius: 8px; text-align: center; margin-top: 15px;">
+                {empty_search_svg}
+                <p style="color: #64748b; margin: 0; font-size: 13.5px; font-weight: 500;">No security audit logs matched the current filter conditions.</p>
+                <p style="color: #475569; margin: 5px 0 0 0; font-size: 12px;">Try adjusting the Session ID search or checking all actions.</p>
             </div>
-        """, unsafe_allow_html=True)
+        """)
         return
 
     # Construct dataframe structure
@@ -81,8 +99,8 @@ def render_security_report():
     )
 
     # Detailed SIEM Inspector
-    st.markdown("<hr style='border-color: #1e293b; margin: 25px 0;'/>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color: #f8fafc; font-weight: 600;'>🔍 Deep Diagnostic Analysis</h3>", unsafe_allow_html=True)
+    render_html("<hr style='border-color: #1e293b; margin: 25px 0;'/>")
+    render_html("<h3 style='color: #f8fafc; font-weight: 600;'>🔍 Deep Diagnostic Analysis</h3>")
     
     log_options = {f"[{log['Timestamp']}] ({log['Verdict']}) ID: {log['Log ID'][:8]}...": log for log in log_data}
     selected_option = st.selectbox("Select Transaction Log Item to Analyze:", list(log_options.keys()))
@@ -99,7 +117,7 @@ def render_security_report():
             st.markdown(f"**Action Verdict:** `{selected_log['policy_action']}`")
             st.markdown(f"**Composite Risk Score:** `{selected_log['overall_risk_score']:.3f}`")
 
-        st.markdown("<br/>", unsafe_allow_html=True)
+        render_html("<br/>")
         
         # Tabs for details
         tab_p, tab_a, tab_r = st.tabs(["📝 Input/Output Payloads", "⚠️ Triggered Violations", "📜 Compliance Document"])
@@ -123,13 +141,13 @@ def render_security_report():
                     sev = event.get("severity_level", "INFO")
                     sev_color = "#ef4444" if sev in ("HIGH", "CRITICAL") else "#f59e0b" if sev == "MEDIUM" else "#94a3b8"
                     
-                    st.markdown(f"""
+                    render_html(f"""
                         <div style="padding: 12px; background-color: #131a26; border-left: 3px solid {sev_color}; border-radius: 4px; margin-bottom: 12px; border: 1px solid #1e293b; border-left-width: 3px;">
                             <div style="font-size: 11px; color: {sev_color}; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">{event.get("agent_source")} • {sev}</div>
                             <div style="font-size: 13px; color: #e2e8f0; font-weight: 500; margin-top: 3px;">{event.get("trigger_type")}</div>
                             <div style="font-size: 12px; color: #64748b; margin-top: 4px; font-family: monospace;">Details: {event.get("details")}</div>
                         </div>
-                    """, unsafe_allow_html=True)
+                    """)
 
         with tab_r:
             st.markdown("#### Generated Security Compliance Audit Document")

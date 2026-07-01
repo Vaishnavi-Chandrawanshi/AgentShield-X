@@ -172,7 +172,8 @@ class PromptInjectionAgent(BaseAgent):
 
         # 6. Hidden Prompt Leakage Checks
         leakage_keywords = [
-            "reveal hidden system prompt", "reveal system prompt", "print system prompt", "output system instructions", "leak system prompt"
+            "reveal hidden system prompt", "reveal system prompt", "print system prompt", "output system instructions", "leak system prompt",
+            "print secret keys", "secret keys", "print secret key", "reveal secret keys", "leak secret keys"
         ]
         if any(kw in prompt_lower for kw in leakage_keywords):
             findings.append("PROMPT_LEAKAGE_ATTEMPT")

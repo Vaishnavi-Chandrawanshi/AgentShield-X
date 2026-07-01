@@ -41,6 +41,8 @@ def test_gateway_evaluate_safe(client: TestClient):
     assert res_data["policy_action"] == "ALLOW"
     assert "sanitized_prompt" in res_data
     assert "log_id" in res_data
+    assert "all_detector_details" in res_data
+    assert len(res_data["all_detector_details"]) == 10
 
 def test_gateway_evaluate_injection_blocking(client: TestClient):
     payload = {

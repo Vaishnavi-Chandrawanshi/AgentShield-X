@@ -50,6 +50,7 @@ class GatewayResponse(BaseModel):
 
     # Make event structure flexible
     events_triggered: List[Dict[str, Any]] = []
+    all_detector_details: List[Dict[str, Any]] = []
 
 class ExploitSignatureResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
