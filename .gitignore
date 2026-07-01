@@ -135,3 +135,6 @@ agentshield.db
 sessions/
 logs/
 *.log
+
+# Interview Handbooks
+AgentShield-X_Project_Handbook.*
